@@ -2,20 +2,20 @@ import pandas as pd
 import numpy as np
 from pyomo.environ import *
 
-distance_matrix = pd.read_csv('../../data/dataset/Distance_Matrix.csv')
-biomass_hist = pd.read_csv('../../data/dataset/Biomass_History.csv')
+distance_matrix = pd.read_csv('../data/dataset/Distance_Matrix.csv')
+biomass_hist = pd.read_csv('../data/dataset/Biomass_History.csv')
 
 distance_matrix.drop(['Unnamed: 0'], axis=1, inplace=True)
 distance_matrix = np.array(distance_matrix)
 
 b_2010 = np.array(biomass_hist['2010'])
 
-def optimize(distance_matrix, harvest,num_locations = 2418,num_depots_max = 25,num_refineries_max = 5,cap_depot = 20000,cap_refinery = 100000):
+def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,num_refineries_max = 5,cap_depot = 20000,cap_refinery = 100000):
        
     #TODO: Harvest needs to ne list of lists, (for every year)
     # Create a concrete model
     model = ConcreteModel()
-
+    harvest = harvests[0]
     # Index sets
     model.locations = RangeSet(num_locations)
     model.depots = RangeSet(num_locations)  # We assume all locations can be potential depots
@@ -114,9 +114,9 @@ def optimize(distance_matrix, harvest,num_locations = 2418,num_depots_max = 25,n
     print("Objective value:", value(model.objective))
 
     depots_used = [j for j in model.depots if value(model.depots_used[j]) > 0.5]
-    print("Depot locations:", depots_used)
+    # print("Depot locations:", depots_used)
     refineries_used = [k for k in model.refineries if value(model.refineries_used[k]) > 0.5]
-    print("Refineries locations:", refineries_used)
+    # print("Refineries locations:", refineries_used)
 
     biomass_source_index = []
     biomass_destination_index = []
@@ -141,4 +141,4 @@ def optimize(distance_matrix, harvest,num_locations = 2418,num_depots_max = 25,n
                 pellet_destination_index.append(j)
                 pellet_flow.append(f)
 
-    return biomass_source_index, biomass_destination_index, biomass_flow, pellet_source_index, pellet_destination_index, pellet_flow
+    return depots_used, refineries_used, biomass_source_index, biomass_destination_index, biomass_flow, pellet_source_index, pellet_destination_index, pellet_flow
