@@ -14,8 +14,8 @@ def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,
        
     #TODO: Harvest needs to ne list of lists, (for every year)
     # Create a concrete model
-    model = ConcreteModel()
     harvest = harvests[0]
+    model = ConcreteModel()
     # Index sets
     model.locations = RangeSet(num_locations)
     model.depots = RangeSet(num_locations)  # We assume all locations can be potential depots
@@ -141,4 +141,4 @@ def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,
                 pellet_destination_index.append(j)
                 pellet_flow.append(f)
 
-    return depots_used, refineries_used, biomass_source_index, biomass_destination_index, biomass_flow, pellet_source_index, pellet_destination_index, pellet_flow
+    return [depots_used, refineries_used, biomass_source_index, biomass_destination_index, biomass_flow, pellet_source_index, pellet_destination_index, pellet_flow]
