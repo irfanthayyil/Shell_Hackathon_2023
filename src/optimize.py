@@ -10,17 +10,21 @@ distance_matrix = np.array(distance_matrix)
 
 b_2010 = np.array(biomass_hist['2010'])
 
-def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,num_refineries_max = 5,cap_depot = 20000,cap_refinery = 100000):
+def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,num_refineries_max = 5,cap_depot = 20000,cap_refinery = 100000, hotspot_indices=None):
        
     #TODO: Harvest needs to be list of lists, (for every year)
     # Create a concrete model
     harvest = harvests[0]
     model = ConcreteModel()
     # Index sets
-    model.locations = RangeSet(num_locations)
-    model.depots = RangeSet(num_locations)  # We assume all locations can be potential depots
-    model.refineries = RangeSet(1, num_locations) # We assume all locations can be potential refineries
-    
+    if hotspot_indices == None:
+        model.locations = RangeSet(num_locations)
+        model.depots = RangeSet(num_locations)  # We assume all locations can be potential depots
+        model.refineries = RangeSet(num_locations) # We assume all locations can be potential refineries
+    else:
+        model.locations = RangeSet(num_locations) 
+        model.depots = Set(initialize=hotspot_indices)  # Consider only the hotspot indices
+        model.refineries = Set(initialize=hotspot_indices)  # Consider only the hotspot indices
     # Decision variables
     model.depots_used = Var(model.depots, within=Binary)
     model.refineries_used = Var(model.refineries, within=Binary)
