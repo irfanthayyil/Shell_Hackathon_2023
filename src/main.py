@@ -17,7 +17,7 @@ if __name__ == "__main__":
     # assert (all(x >= 0 for x in forecast_2019)),  "Constraint 1 failed for forecast 2019"
 
     hotspot_indices = []
-    with open('../outputs/indices_361.txt') as f:
+    with open('../outputs/indices_48.txt') as f:
         for x in f:
             hotspot_indices.append(int(x.split('\n')[0]))
 

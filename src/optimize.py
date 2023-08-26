@@ -2,13 +2,13 @@ import pandas as pd
 import numpy as np
 from pyomo.environ import *
 
-distance_matrix = pd.read_csv('../data/dataset/Distance_Matrix.csv')
-biomass_hist = pd.read_csv('../data/dataset/Biomass_History.csv')
+# distance_matrix = pd.read_csv('../data/dataset/Distance_Matrix.csv')
+# biomass_hist = pd.read_csv('../data/dataset/Biomass_History.csv')
 
-distance_matrix.drop(['Unnamed: 0'], axis=1, inplace=True)
-distance_matrix = np.array(distance_matrix)
+# distance_matrix.drop(['Unnamed: 0'], axis=1, inplace=True)
+# distance_matrix = np.array(distance_matrix)
 
-b_2010 = np.array(biomass_hist['2010'])
+# b_2010 = np.array(biomass_hist['2010'])
 
 def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,num_refineries_max = 5,cap_depot = 20000,cap_refinery = 100000, hotspot_indices=None):
        
@@ -34,32 +34,32 @@ def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,
     # model.under_utilization_cost = Var(model.depots, within=NonNegativeReals)
     # model.under_utilization_cost_refineries = Var(model.refineries, within=NonNegativeReals)
     # model.pellet_flow_active = Var(model.depots, model.refineries, within=Binary)  # Binary variable indicating active pellet flow
-
+    print("Setting Objective Function...")
     ## Linear
 
-    # # Objective function
-    # def objective_rule(model):
-    #     return (
-    #         0.001*sum(distance_matrix[i-1][j-1] * model.harvest_flow[i, j] for i in model.locations for j in model.depots) +
-    #         0.001*sum(distance_matrix[j-1][k-1] * model.pellet_flow[j, k] for j in model.depots for k in model.refineries) +
-    #         sum(cap_depot - model.harvest_flow[i, j] for i in model.locations for j in model.depots) +  # Under-utilization cost for depots
-    #         sum(cap_refinery - model.pellet_flow[j, k] for j in model.depots for k in model.refineries)   # Under-utilization cost for refineries
-    #         # sum(cap_refinery * (1 - model.refineries_used[k]) for k in model.refineries)  # Under-utilization cost for unused refineries -->redundant
-    #     )
-    # model.objective = Objective(rule=objective_rule, sense=minimize)
+    # Objective function
+    def objective_rule(model):
+        return (
+            0.001*sum(distance_matrix[i-1][j-1] * model.harvest_flow[i, j] for i in model.locations for j in model.depots) +
+            0.001*sum(distance_matrix[j-1][k-1] * model.pellet_flow[j, k] for j in model.depots for k in model.refineries) +
+            sum(cap_depot - model.harvest_flow[i, j] for i in model.locations for j in model.depots) +  # Under-utilization cost for depots
+            sum(cap_refinery - model.pellet_flow[j, k] for j in model.depots for k in model.refineries)   # Under-utilization cost for refineries
+            # sum(cap_refinery * (1 - model.refineries_used[k]) for k in model.refineries)  # Under-utilization cost for unused refineries -->redundant
+        )
+    model.objective = Objective(rule=objective_rule, sense=minimize)
 
 
     ## Non Linear
     # Objective function
-    print("Setting Objective Function...")
-    def objective_rule(model):
-        return (
-            0.001*sum(distance_matrix[i-1][j-1]*model.harvest_flow[i, j]*model.depots_used[j] for i in model.locations for j in model.depots) +
-            0.001*sum(distance_matrix[j-1][k-1]*model.pellet_flow[j, k]*model.depots_used[j] *model.refineries_used[k]  for j in model.depots for k in model.refineries) +
-            sum(cap_depot - model.harvest_flow[i, j] for i in model.locations for j in model.depots) +  # Under-utilization cost for depots
-            sum(cap_refinery - model.pellet_flow[j, k] for j in model.depots for k in model.refineries)   # Under-utilization cost for refineries
-        )
-    model.objective = Objective(rule=objective_rule, sense=minimize)
+    
+    # def objective_rule(model):
+    #     return (
+    #         0.001*sum(distance_matrix[i-1][j-1]*model.harvest_flow[i, j]*model.depots_used[j] for i in model.locations for j in model.depots) +
+    #         0.001*sum(distance_matrix[j-1][k-1]*model.pellet_flow[j, k]*model.depots_used[j] *model.refineries_used[k]  for j in model.depots for k in model.refineries) +
+    #         sum(cap_depot - model.harvest_flow[i, j] for i in model.locations for j in model.depots) +  # Under-utilization cost for depots
+    #         sum(cap_refinery - model.pellet_flow[j, k] for j in model.depots for k in model.refineries)   # Under-utilization cost for refineries
+    #     )
+    # model.objective = Objective(rule=objective_rule, sense=minimize)
 
 
     # Constraints
