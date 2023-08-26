@@ -17,6 +17,7 @@ def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,
     harvest = harvests[0]
     model = ConcreteModel()
     # Index sets
+    print("Setting Decision Variables...")
     if hotspot_indices == None:
         model.locations = RangeSet(num_locations)
         model.depots = RangeSet(num_locations)  # We assume all locations can be potential depots
@@ -50,6 +51,7 @@ def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,
 
     ## Non Linear
     # Objective function
+    print("Setting Objective Function...")
     def objective_rule(model):
         return (
             0.001*sum(distance_matrix[i-1][j-1]*model.harvest_flow[i, j]*model.depots_used[j] for i in model.locations for j in model.depots) +
@@ -61,7 +63,7 @@ def optimize(distance_matrix, harvests,num_locations = 2418,num_depots_max = 25,
 
 
     # Constraints
-
+    print("Setting Constraints...")
     # * Constraint 2
     def harvest_supply_constraint_rule(model, i):
         return sum(model.harvest_flow[i, j] for j in model.depots) <= harvest[i-1]
